@@ -1,0 +1,21 @@
+title: Pose Detection Recreate
+version: 1.0.0
+description: "Recreate - Library file to split the images into train split and create relevant directories"
+icon: python
+author: "cnvrg"
+author_email: "info@cnvrg.io"
+tags:
+  - train
+command: python3 recreate.py
+requirements:
+  cpu: 1
+  memory: 8
+  gpu: 0
+  hpu: 0
+image: cnvrg:v5.0
+language: python3
+arguments:
+  - key: images
+    type: 'categorical'
+    values:
+      - '/data/yoga_poses/.csv'

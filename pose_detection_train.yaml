@@ -1,0 +1,220 @@
+title: Pose Detection Train
+version: 1.0.0
+description: "Train a model to detect body poses in images"
+long_description: "Train a model on your custom data to detect human body poses and their location in images"
+author: "cnvrg"
+author_email: "info@cnvrg.io"
+
+tags:
+  - training
+tasks:
+  - title: S3 Connector
+    top: 300
+    left: 0
+
+    # Type must be according to the flow task conventions (data, exec, deploy)
+    type: exec
+
+    # The library data
+    library: s3-connector
+    library_version: 1.0.0
+
+    # The flattened library parameters (in this case we have training library)
+    command: python s3-connector.py
+
+    requirements:
+      cpu: 3.5
+      memory: 8
+      gpu: 0
+      hpu: 0
+
+    image: cnvrg:v5.0
+    language: python3
+
+    # The "arguments" property changes to "params", rest remains the same.
+    # Params in the blueprint yaml can be used to override the arguments in the library.
+    params:
+      - key: endpoint
+        type: 'categorical'
+        values:
+          - 'http://s3.amazonaws.com download'
+      - key: bucketname
+        type: 'categorical'
+        values:
+          - 'libhub-readme'
+      - key: localdir
+        type: 'categorical'
+        values:
+          - '/cnvrg'
+      - key: prefix
+        type: 'categorical'
+        values:
+          - 'pose_detection_data/'
+  - title: Train Test Split
+    top: 400
+    left: 100
+
+    # Type must be according to the flow task conventions (data, exec, deploy)
+    type: exec
+
+    # The library data
+    library: pose-detection-recreate
+    library_version: 1.0.0
+
+    # The flattened library parameters (in this case we have training library)
+    command: python3 recreate.py
+
+    requirements:
+      cpu: 3.5
+      memory: 8
+      gpu: 0
+      hpu: 0
+
+    image: cnvrg:v5.0
+    language: python3
+
+    # The "arguments" property changes to "params", rest remains the same.
+    # Params in the blueprint yaml can be used to override the arguments in the library.
+    params:
+      - key: images
+        type: 'categorical'
+        values:
+          - '/input/s3_connector/pose_detection_data'
+  - title: Train
+    top: 400
+    left: 300
+
+    # Type must be according to the flow task conventions (data, exec, deploy)
+    type: exec
+
+    # The library data
+    library: pose-detection-train
+    library_version: 1.0.0
+
+    # The flattened library parameters (in this case we have training library)
+    command: python3 pose.py
+
+    requirements:
+      cpu: 3.5
+      memory: 8
+      gpu: 0
+      hpu: 0
+
+    image: cnvrg:v5.0
+    language: python3
+
+    # The "arguments" property changes to "params", rest remains the same.
+    # Params in the blueprint yaml can be used to override the arguments in the library.
+    params:
+      - key: train_dir
+        type: 'categorical'
+        values:
+          - '/input/train_test_split/train/'
+      - key: test_dir
+        type: 'categorical'
+        values:
+          - '/input/train_test_split/test/'
+  - title: Classify
+    top: 400
+    left: 500
+
+    # Type must be according to the flow task conventions (data, exec, deploy)
+    type: exec
+
+    # The library data
+    library: pose-detection-classification
+    library_version: 1.0.0
+
+    # The flattened library parameters (in this case we have training library)
+    command: python3 pose_classify.py
+
+    requirements:
+      cpu: 3.5
+      memory: 8
+      gpu: 0
+      hpu: 0
+
+    image: cnvrg:v5.0
+    language: python3
+
+    # The "arguments" property changes to "params", rest remains the same.
+    # Params in the blueprint yaml can be used to override the arguments in the library.
+    params:
+      - key: train_dir
+        type: 'categorical'
+        values:
+          - '/input/train/train_data.csv'
+      - key: test_dir
+        type: 'categorical'
+        values:
+          - '/input/train/test_data.csv'
+      - key: test_dir_img
+        type: 'categorical'
+        values:
+          - '/input/train/poses_images_out_test/'
+      - key: box_file
+        type: 'categorical'
+        values:
+          - '/input/train/box_file.csv'
+      - key: optimizer_1
+        type: 'categorical'
+        value:
+          - 'adam'
+      - key: loss_1
+        type: 'categorical'
+        values:
+          - 'categorical_crossentropy'
+      - key: epoch_1
+        type: 'discrete'
+        values:
+          - '200'
+      - key: patience_1
+        type: 'discrete'
+        values:
+          - '20'
+  - title: Deploy Endpoint
+    top: 400
+    left: 700
+
+    # Type must be according to the flow task conventions (data, exec, deploy)
+    type: deploy
+
+    # The library data
+    library: pose-inference
+    library_version: 1.0.0
+
+    # The flattened library parameters (in this case we have inference library)
+    kind: webservice
+
+    requirements:
+      cpu: 1
+      memory: 4
+      gpu: 0
+      hpu: 0
+
+    image: cnvrg:v5.0
+    language: python3
+    accept_files: false
+    gunicorn_config:
+      - key: workers
+        value: '1'
+    file_name: predict.py # the entrypoint file name
+    function_name: predict # the entrypoint function
+    prep_file: '' # preprocess file name
+    prep_function: '' # preprocess function
+    input_example:
+      img: txt
+    input_schema:
+      img: file
+    output_schema: {}
+      
+      
+relations:
+  - from: S3 Connector
+    to: Train Test Split
+  - from: Train Test Split
+    to: Train
+  - from: Train
+    to: Classify
+  - from: Classify
+    to: Deploy Endpoint

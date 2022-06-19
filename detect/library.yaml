@@ -1,0 +1,27 @@
+title: Pose Detection Train
+version: 1.0.0
+description: "detecting key checkpoints in an image and drawing a bounding box over it, with data export as csv"
+icon: python
+author: "cnvrg"
+author_email: "info@cnvrg.io"
+tags:
+  - training
+command: python3 pose.py
+requirements:
+  cpu: 3.5
+  memory: 8
+  gpu: 0
+  hpu: 0
+
+image: cnvrg:v5.0
+language: python3
+
+arguments:
+  - key: train_dir
+    type: 'categorical'
+    values:
+      - 'input/pose_recreate/train/'
+  - key: test_dir
+    type: 'categorical'
+    values:
+      - '/input/pose_recreate/test/'

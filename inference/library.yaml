@@ -1,0 +1,40 @@
+title: Pose Inference
+version: 1.0.0
+description: "Getting the label of a single image in terms of which pose is it in"
+icon: python
+
+# At least one tag [inference, training, data] must be present
+tags:
+  - inference
+
+# Available only for inference (deploy tasks) libraries only
+kind: webservice # required
+
+# These will replace the "compute" argument, values must be >= 0:
+# We need to add requirement for distributed pods
+requirements:
+  cpu: 1
+  memory: 4
+  gpu: 0
+  hpu: 0
+
+# This will replace the "docker_images" argument (?) need to work in cnvrg as well
+image: cnvrg:v5.0 # cnvrg:v5.0
+
+# This will replace "env_setup", currently only python 3 is supported.
+language: python3
+
+arguments:
+  gunicorn_config:
+    - key: workers
+      value: '1'
+  accept_files: false # whether the endpoint accepts files as inputs
+  file_name: predict.py # the entrypoint file name
+  function_name: predict # the entrypoint function
+  prep_file: '' # preprocess file name
+  prep_function: '' # preprocess function
+  input_example:
+    img: txt
+  input_schema:
+    img: file
+  output_schema: {}

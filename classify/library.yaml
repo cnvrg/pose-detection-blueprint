@@ -1,0 +1,56 @@
+title: Pose Detection Classification
+version: 1.0.0
+description: "classify the image on the basis of the checkpoints via a keras model and writing the label on it"
+icon: python
+
+author: "cnvrg"
+author_email: "info@cnvrg.io"
+
+tags:
+  - training
+
+command: python3 pose_classify.py
+
+requirements:
+  cpu: 3.5
+  memory: 8
+  gpu: 0
+  hpu: 0
+
+image: cnvrg:v5.0
+
+language: python3
+
+arguments:
+  - key: train_dir
+    type: 'categorical'
+    values:
+      - '/input/train/train_data.csv'
+  - key: test_dir
+    type: 'categorical'
+    values:
+      - '/input/train/test_data.csv'
+  - key: test_dir_img
+    type: 'categorical'
+    values:
+      - '/input/train/poses_images_out_test/'
+  - key: box_file
+    type: 'categorical'
+    values:
+      - '/input/pose_detect/box_file.csv'
+  - key: optimizer_1
+    type: 'categorical'
+    value:
+      - 'adam'
+  - key: loss_1
+    type: 'categorical'
+    values:
+      - 'categorical_crossentropy'
+  - key: epoch_1
+    type: 'discrete'
+    values:
+      - '200'
+  - key: patience_1
+    type: 'discrete'
+    values:
+      - '20'
