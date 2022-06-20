@@ -22,6 +22,6 @@ In order to train this model with your data, you would need to provide a folder 
 7. You can use the `Try it Live` section with any image to check your model
 8. You can also integrate your API with your code using the integration panel at the bottom of the page
 
-Congrats! You have trained and deployed a custom model that can detects human body poses in images!
+Congratulations! You have trained and deployed a custom model that can detects human body poses in images!
 
 [See here how we created this blueprint](https://github.com/cnvrg/Blueprints/tree/main/Pose%20Detection)
