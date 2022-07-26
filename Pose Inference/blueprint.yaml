@@ -1,0 +1,43 @@
+title: Pose Detect Inference # Required on creation, replaces the "flow" parameter
+version: 1.0.0 # Required
+description: Detect generic human poses from images
+long_description: This blueprint detects multiple generic human poses from images and classifies them into one of the predefined poses that have been pretrained in the model.
+author: "cnvrg"
+author_email: "libhub@cnvrg.io"
+
+tags:
+  - inference
+
+tasks:
+  - title: Pose Inference
+    top: 400
+    left: 500
+
+    type: deploy
+
+    library: pose-detect-inference
+    library_version: 1.0.0
+
+    command: python3 predict.py 
+    kind: webservice
+    requirements:
+      cpu: 3.5
+      memory: 8
+      gpu: 0
+      hpu: 0
+    image: cnvrg:v5.0
+    language: python3
+    accept_files: false
+    file_name: predict.py # the entrypoint file name
+    function_name: predict # the entrypoint function
+    prep_file: '' # preprocess file name
+    prep_function: '' # preprocess function
+    input_example:
+      img: file
+    input_schema:
+      img: file
+    output_schema:
+      prediction: dict
+relations: []
+
+
