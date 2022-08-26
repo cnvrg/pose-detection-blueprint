@@ -1,0 +1,34 @@
+title: Pose Detect Inference Yoga
+version: 1.0.0
+description: Getting the label of a single image in terms of which pose is it in
+icon: python
+author: "cnvrg" 
+author_email: "libhub@cnvrg.io" 
+
+tags:
+  - inference
+
+kind: webservice
+
+requirements:
+  cpu: 3.5
+  memory: 8
+  gpu: 0
+  hpu: 0
+
+image: cnvrg/cnvrg:v5.0
+
+language: python3
+
+arguments:
+  accept_files: true
+  file_name: predict.py
+  function_name: predict
+  prep_file: ''
+  prep_function: ''
+  input_example:
+    img: file
+  input_schema:
+    img: file
+  output_schema:
+    prediction: text
