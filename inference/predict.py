@@ -25,16 +25,19 @@ currpath = os.path.dirname(os.path.abspath(__file__))
 model_path = currpath + "/yolov5s.pt"
 orig = os.getcwd()
 os.chdir(currpath)
+sys.path.append(currpath)
+
+from prerun import download_model_files
+
+download_model_files()
+
 yolo_model = torch.hub.load(
     os.getcwd(), "custom", source="local", path=model_path, force_reload=True
 )  # local repo
 
 os.chdir(orig)
-sys.path.append(currpath)
 # Load MoveNet Thunder model
-from prerun import download_model_files
 
-download_model_files()
 from data import BodyPart
 from movenet import Movenet
 
