@@ -5,7 +5,7 @@ import pathlib
 
 BASE_FOLDER_URL = "https://libhub-readme.s3.us-west-2.amazonaws.com/model_files/pose_detection/"
 
-FILES = ["yolov5s.pt","yoga/weights.best.hdf5","yoga/class_names.csv"]
+FILES = ["yolov5s.pt","generic/weights.best.hdf5","generic/class_names.csv"]
 
 
 def download_model_files():
