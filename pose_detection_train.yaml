@@ -180,7 +180,7 @@ tasks:
     type: deploy
 
     # The library data
-    library: pose-inference
+    library: pose-detect-inference
     library_version: 1.0.0
 
     # The flattened library parameters (in this case we have inference library)

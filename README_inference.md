@@ -8,4 +8,4 @@ For using this pretrained pose detection model, you will need to create a ready-
 
 Congrats! You have deployed an API endpoint that detects human body poses in images!
 
-[See here how we created this blueprint](https://github.com/cnvrg/Blueprints/tree/main/Pose%20Detection)
+[See here how we created this blueprint](https://github.com/cnvrg/pose-detection-blueprint)
