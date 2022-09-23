@@ -22,23 +22,6 @@ import base64 as b6
 cnvrg_workdir = os.environ.get("CNVRG_WORKDIR", "/cnvrg")
 parser = argparse.ArgumentParser(description="""Creator""")
 parser.add_argument(
-    "-f",
-    "--train_dir",
-    action="store",
-    dest="train_dir",
-    default="input/detect/train_data.csv",
-    required=True,
-    help="""string. csv topics data file""",
-)
-parser.add_argument(
-    "--test_dir",
-    action="store",
-    dest="test_dir",
-    default="input/detect/test_data.csv",
-    required=True,
-    help="""string. csv topics data file""",
-)
-parser.add_argument(
     "--test_dir_img",
     action="store",
     dest="test_dir_img",
@@ -47,59 +30,55 @@ parser.add_argument(
     help="""string bounding box images folder test""",
 )
 parser.add_argument(
-    "--box_file",
+    "--model_weights",
     action="store",
-    dest="box_file",
-    default="/input/detect/box_file.csv",
+    dest="model_weights",
+    default="/s3-connector/pose-detection/weights.best.h5",
     required=True,
     help="""csv containing bounding box information""",
 )
 parser.add_argument(
-    "--optimizer_1",
+    "--class_names",
     action="store",
-    dest="optimizer_1",
+    dest="class_names",
+    default='/s3_connector/pose_detection/class_names.csv',
+    required=True,
+    help="""hyperparameter""",
+)
+parser.add_argument(
+    "--optimizer",
+    action="store",5
+    dest="optimizer",
     default="adam",
     required=True,
     help="""hyperparameter""",
 )
 parser.add_argument(
-    "--loss_1",
+    "--loss",
     action="store",
-    dest="loss_1",
+    dest="loss",
     default="categorical_crossentropy",
     required=True,
     help="""hyperparameter""",
 )
 parser.add_argument(
-    "--patience_1",
+    "--metrics",
     action="store",
-    dest="patience_1",
-    default=20,
-    required=True,
-    help="""hyperparameter""",
-)
-parser.add_argument(
-    "--epoch_1",
-    action="store",
-    dest="epoch_1",
-    default=200,
+    dest="metrics",
+    default='accuracy',
     required=True,
     help="""hyperparameter""",
 )
 
 args = parser.parse_args()
-csvs_out_train_path = args.train_dir
-csvs_out_test_path = args.test_dir
 test_bounded_img = args.test_dir_img
 font_1 = 'InputSans-Regular.ttf'
-box_file_1 = args.box_file
-box_file_1 = pd.read_csv(box_file_1)
-optimizer_1 = args.optimizer_1
-loss_1 = args.loss_1
-patience_1 = int(args.patience_1)
-epoch_1 = int(args.epoch_1)
-
-
+#box_file_1 = pd.read_csv(box_file_1)
+optimizer = args.optimizer
+loss = args.loss
+metrics = args.metrics
+model_weights = args.model_weights
+class_names = args.class_names
 # load yolo model
 
 currpath = os.path.dirname(os.path.abspath(__file__))
@@ -199,27 +178,21 @@ def detect(input_tensor, inference_count=3):
     A Person entity detected by the MoveNet.SinglePose.
   """
     image_height, image_width, channel = input_tensor.shape
-
     # Detect pose using the full input image
     movenet.detect(input_tensor, reset_crop_region=True)
-
     # Repeatedly using previous detection result to identify the region of
     # interest and only croping that region to improve detection accuracy
     for _ in range(inference_count - 1):
         person = movenet.detect(input_tensor, reset_crop_region=False)
-
     return person
 
-
 list_name = np.array(orig_cols).flatten()
-
 
 def get_center_point(landmarks, left_bodypart, right_bodypart):
     left = tf.gather(landmarks, left_bodypart.value, axis=1)
     right = tf.gather(landmarks, right_bodypart.value, axis=1)
     center = left * 0.5 + right * 0.5
     return center
-
 
 def get_pose_size(landmarks, torso_size_multiplier=2.5):
     # Hips center
@@ -247,7 +220,6 @@ def get_pose_size(landmarks, torso_size_multiplier=2.5):
     pose_size = tf.maximum(torso_size * torso_size_multiplier, max_dist)
     return pose_size
 
-
 def normalize_pose_landmarks(landmarks):
     # Move landmarks so that the pose center becomes (0,0)
     pose_center = get_center_point(landmarks, BodyPart.LEFT_HIP, BodyPart.RIGHT_HIP)
@@ -261,7 +233,6 @@ def normalize_pose_landmarks(landmarks):
     landmarks /= pose_size
     return landmarks
 
-
 def landmarks_to_embedding(landmarks_and_scores):
     # Reshape the flat input into a matrix with shape=(17, 3)
     reshaped_inputs = keras.layers.Reshape((17, 3))(landmarks_and_scores)
@@ -270,7 +241,6 @@ def landmarks_to_embedding(landmarks_and_scores):
     # Flatten the normalized landmark coordinates into a vector
     embedding = keras.layers.Flatten()(landmarks)
     return embedding
-
 
 def bounding_box(points):
     x_coordinates, y_coordinates = zip(*points)
@@ -281,13 +251,12 @@ def bounding_box(points):
         int(max(y_coordinates)),
     )
 
-
-if os.path.exists("/input/pose_classify/weights.best.hdf5"):
-    class_names = "/input/pose_classify/class_names.csv"
-    model_path = "/input/pose_classify/weights.best.hdf5"
-else:
-    class_names = currpath + "/class_names.csv"
-    model_path = currpath + "/weights.best.hdf5"
+#if os.path.exists("/input/pose_classify/weights.best.hdf5"):
+#    class_names = "/input/pose_classify/class_names.csv"
+#    model_path = "/input/pose_classify/weights.best.hdf5"
+#else:
+#    class_names = currpath + "/class_names.csv"
+#    model_path = currpath + "/weights.best.hdf5"
 
 # read the names of the categories the model is capable of predicting
 ch = pd.read_csv(class_names)
@@ -310,21 +279,21 @@ layer = keras.layers.Dropout(0.2)(layer)
 outputs = keras.layers.Dense(len(ch), activation="softmax")(layer)
 
 model_3 = keras.Model(inputs, outputs)
-model_3.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"])
+model_3.compile(optimizer=optimizer, loss=loss, metrics=[metrics])
 model_3.load_weights(model_path)
 
-
-def predict(data):
-    predict_1 = {}
+for file in os.listdir(test_image_path):
+    s
+    savepath = 
     # for each image in the input loop
-    for imgnumber, imgdata in enumerate(data["img"]):
-        predict_1[imgnumber + 1] = {}
-        decoded = b6.b64decode(imgdata)
-        extension = magic.from_buffer(decoded, mime=True).split("/")[-1]
-        nparr = np.fromstring(decoded, np.uint8)
-        img_dec = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)
-        savepath = f"img.{extension}"
-        cv2.imwrite(savepath, img_dec)
+    #for imgnumber, imgdata in enumerate(data["img"]):
+    #    predict_1[imgnumber + 1] = {}
+    #    decoded = b6.b64decode(imgdata)
+    #    extension = magic.from_buffer(decoded, mime=True).split("/")[-1]
+    #    nparr = np.fromstring(decoded, np.uint8)
+    #    img_dec = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)
+    #    savepath = f"img.{extension}"
+    #    cv2.imwrite(savepath, img_dec)
         results = yolo_model(savepath)  # detect objects using yolo
         detections = results.pandas().xyxy[0]
         human_detection = detections[
@@ -368,4 +337,3 @@ def predict(data):
                 "pose": y_pred_label[0],
                 "conf": float(conf),
             }
-    return predict_1
