@@ -47,7 +47,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "--optimizer",
-    action="store",5
+    action="store",
     dest="optimizer",
     default="adam",
     required=True,
@@ -281,59 +281,59 @@ outputs = keras.layers.Dense(len(ch), activation="softmax")(layer)
 model_3 = keras.Model(inputs, outputs)
 model_3.compile(optimizer=optimizer, loss=loss, metrics=[metrics])
 model_3.load_weights(model_path)
-
+final_output_frame = pd.DataFrame(columns=[''])
 for file in os.listdir(test_image_path):
-    s
-    savepath = 
+    
+    savepath = os.path.join(test_image_path,file)
     # for each image in the input loop
-    #for imgnumber, imgdata in enumerate(data["img"]):
-    #    predict_1[imgnumber + 1] = {}
-    #    decoded = b6.b64decode(imgdata)
-    #    extension = magic.from_buffer(decoded, mime=True).split("/")[-1]
-    #    nparr = np.fromstring(decoded, np.uint8)
-    #    img_dec = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)
-    #    savepath = f"img.{extension}"
-    #    cv2.imwrite(savepath, img_dec)
-        results = yolo_model(savepath)  # detect objects using yolo
-        detections = results.pandas().xyxy[0]
-        human_detection = detections[
-            detections["name"] == "person"
-        ]  # filter out the humans among detected objects
-        humans = len(human_detection)
-        orig = cv2.imread(savepath)
-        orig2 = orig.copy()
-        if humans == 0:
-            pass
-        for i in range(humans):  # for each detected human loop
-            print("processing {0} detected human".format(i + 1))
+#for imgnumber, imgdata in enumerate(data["img"]):
+#    predict_1[imgnumber + 1] = {}
+#    decoded = b6.b64decode(imgdata)
+#    extension = magic.from_buffer(decoded, mime=True).split("/")[-1]
+#    nparr = np.fromstring(decoded, np.uint8)
+#    img_dec = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)
+#    savepath = f"img.{extension}"
+#    cv2.imwrite(savepath, img_dec)
+    results = yolo_model(savepath)  # detect objects using yolo
+    detections = results.pandas().xyxy[0]
+    human_detection = detections[
+        detections["name"] == "person"
+    ]  # filter out the humans among detected objects
+    humans = len(human_detection)
+    orig = cv2.imread(savepath)
+    orig2 = orig.copy()
+    if humans == 0:
+        pass
+    for i in range(humans):  # for each detected human loop
+        print("processing {0} detected human".format(i + 1))
 
-            # Get the box of first human
-            xmin = int(human_detection.iloc[i]["xmin"])
-            ymin = int(human_detection.iloc[i]["ymin"])
-            xmax = int(human_detection.iloc[i]["xmax"])
-            ymax = int(human_detection.iloc[i]["ymax"])
-            # crop the image
-            single_humanimg = orig[ymin:ymax, xmin:xmax]
-            # send the image for pose estimation
-            person = detect(single_humanimg)
-            pose_landmarks = np.array(
-                [
-                    [keypoint.coordinate.x, keypoint.coordinate.y, keypoint.score,]
-                    for keypoint in person.keypoints
-                ],
-                dtype=np.float32,
-            )
-            df = pd.DataFrame(columns=list_name)
-            df.loc[len(df)] = list(pose_landmarks.flatten())
+        # Get the box of first human
+        xmin = int(human_detection.iloc[i]["xmin"])
+        ymin = int(human_detection.iloc[i]["ymin"])
+        xmax = int(human_detection.iloc[i]["xmax"])
+        ymax = int(human_detection.iloc[i]["ymax"])
+        # crop the image
+        single_humanimg = orig[ymin:ymax, xmin:xmax]
+        # send the image for pose estimation
+        person = detect(single_humanimg)
+        pose_landmarks = np.array(
+            [
+                [keypoint.coordinate.x, keypoint.coordinate.y, keypoint.score,]
+                for keypoint in person.keypoints
+            ],
+            dtype=np.float32,
+        )
+        df = pd.DataFrame(columns=list_name)
+        df.loc[len(df)] = list(pose_landmarks.flatten())
 
-            # make pose estimation using df
-            class_names = ch.values.flatten()
-            df = df.astype("float64")
-            y_pred = model_3.predict(df)
-            y_pred_label = [class_names[i] for i in np.argmax(y_pred, axis=1)]
-            conf = np.amax(y_pred)
-            predict_1[imgnumber + 1]["human " + str(i + 1)] = {
-                "bbox": [xmin, ymin, xmax, ymax],
-                "pose": y_pred_label[0],
-                "conf": float(conf),
-            }
+        # make pose estimation using df
+        class_names = ch.values.flatten()
+        df = df.astype("float64")
+        y_pred = model_3.predict(df)
+        y_pred_label = [class_names[i] for i in np.argmax(y_pred, axis=1)]
+        conf = np.amax(y_pred)
+        predict_1[imgnumber + 1]["human " + str(i + 1)] = {
+            "bbox": [xmin, ymin, xmax, ymax],
+            "pose": y_pred_label[0],
+            "conf": float(conf),
+        }
