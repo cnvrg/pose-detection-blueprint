@@ -17,7 +17,7 @@ More information is given at the end of this documentation.
                 | ..img75.jpg
 - `-- test_dir` refers to the directory which contains all the test images.
      ```
-        | - train
+        | - test
             | - chair
                 | - img13.jpg
                 | - img24.jpg
