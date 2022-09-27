@@ -71,7 +71,7 @@ parser.add_argument(
 )
 
 args = parser.parse_args()
-test_bounded_img = args.test_dir_img
+test_image_path = args.test_dir_img
 font_1 = 'InputSans-Regular.ttf'
 #box_file_1 = pd.read_csv(box_file_1)
 optimizer = args.optimizer
@@ -281,19 +281,10 @@ outputs = keras.layers.Dense(len(ch), activation="softmax")(layer)
 model_3 = keras.Model(inputs, outputs)
 model_3.compile(optimizer=optimizer, loss=loss, metrics=[metrics])
 model_3.load_weights(model_path)
-final_output_frame = pd.DataFrame(columns=[''])
+final_output_frame = pd.DataFrame(columns=['filename','x_coord','y_coord','width','height','confidence_score','predicted_class'])
+cnt = 0
 for file in os.listdir(test_image_path):
-    
     savepath = os.path.join(test_image_path,file)
-    # for each image in the input loop
-#for imgnumber, imgdata in enumerate(data["img"]):
-#    predict_1[imgnumber + 1] = {}
-#    decoded = b6.b64decode(imgdata)
-#    extension = magic.from_buffer(decoded, mime=True).split("/")[-1]
-#    nparr = np.fromstring(decoded, np.uint8)
-#    img_dec = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)
-#    savepath = f"img.{extension}"
-#    cv2.imwrite(savepath, img_dec)
     results = yolo_model(savepath)  # detect objects using yolo
     detections = results.pandas().xyxy[0]
     human_detection = detections[
@@ -306,7 +297,6 @@ for file in os.listdir(test_image_path):
         pass
     for i in range(humans):  # for each detected human loop
         print("processing {0} detected human".format(i + 1))
-
         # Get the box of first human
         xmin = int(human_detection.iloc[i]["xmin"])
         ymin = int(human_detection.iloc[i]["ymin"])
@@ -325,15 +315,23 @@ for file in os.listdir(test_image_path):
         )
         df = pd.DataFrame(columns=list_name)
         df.loc[len(df)] = list(pose_landmarks.flatten())
-
         # make pose estimation using df
         class_names = ch.values.flatten()
         df = df.astype("float64")
         y_pred = model_3.predict(df)
         y_pred_label = [class_names[i] for i in np.argmax(y_pred, axis=1)]
         conf = np.amax(y_pred)
-        predict_1[imgnumber + 1]["human " + str(i + 1)] = {
-            "bbox": [xmin, ymin, xmax, ymax],
-            "pose": y_pred_label[0],
-            "conf": float(conf),
-        }
+        final_output_frame.at[cnt,'filename'] = file
+        final_output_frame.at[cnt,'x_coord'] = xmin
+        final_output_frame.at[cnt,'y_coord'] = ymin
+        final_output_frame.at[cnt,'width'] = xmax-xmin
+        final_output_frame.at[cnt,'height'] = ymax-ymin
+        final_output_frame.at[cnt,'confidence_score'] = round(float(conf),4)
+        final_output_frame.at[cnt,'predicted_class'] = y_pred_label[0]
+        #predict_1[imgnumber + 1]["human " + str(i + 1)] = {
+        #    "bbox": [xmin, ymin, xmax, ymax],
+        #    "pose": y_pred_label[0],
+        #    "conf": float(conf),
+        #}
+final_path = os.path.join(cnvrg_workdir,'final_output.csv')
+final_output_frame.to_csv(final_path)

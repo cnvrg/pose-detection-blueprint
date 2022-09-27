@@ -300,7 +300,7 @@ df_test_1 = pd.concat(
     [df_test[["file_name", "class_no", "class_name"]], predicted_df], axis=1
 )
 dictionary_1 = df_test[["class_no", "class_name"]].drop_duplicates()
-# ################################# Writing on image and exporting the images ##############################
+##################### Writing on image and exporting the images #######################
 poses_1 = os.listdir(test_bounded_img)
 font_size = 16
 font_path = font_1
