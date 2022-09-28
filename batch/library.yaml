@@ -1,14 +1,15 @@
-title: Pose Detect Inference
+title: Pose Detection Batch
 version: 1.0.0
-description: Getting the label of a single image in terms of which pose is it in
+description: "classify the image on the basis of the checkpoints via a pretrained keras model and writing the label on it"
 icon: python
-author: "cnvrg" 
-author_email: "libhub@cnvrg.io" 
+
+author: "cnvrg"
+author_email: "info@cnvrg.io"
 
 tags:
-  - inference
+  - training
 
-kind: webservice
+command: python3 batch.py
 
 requirements:
   cpu: 3.5
@@ -16,19 +17,32 @@ requirements:
   gpu: 0
   hpu: 0
 
-image: cnvrg/cnvrg:v5.0
+image: cnvrg:v5.0
 
 language: python3
 
 arguments:
-  accept_files: true
-  file_name: predict.py
-  function_name: predict
-  prep_file: ''
-  prep_function: ''
-  input_example:
-    img: file
-  input_schema:
-    img: file
-  output_schema:
-    prediction: text
+  - key: test_dir_img
+    type: 'categorical'
+    values:
+      - '/input/s3_connector/pose_detection/test_images'
+  - key: model_weights
+    type: 'categorical'
+    values:
+      - '/input/s3_connector/pose_detection/weights.best.hdf5'
+  - key: class_names
+    type: 'categorical'
+    values:
+      - '/input/s3_connector/pose_detection/class_names.csv'
+  - key: optimizer
+    type: 'categorical'
+    value:
+      - 'adam'
+  - key: loss
+    type: 'categorical'
+    values:
+      - 'categorical_crossentropy'
+  - key: metrics
+    type: 'discrete'
+    values:
+      - 'accuracy'

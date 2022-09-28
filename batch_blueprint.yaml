@@ -1,0 +1,106 @@
+title: Pose Detection Batch
+version: 1.0.0
+description: "Use a pretrained model to "
+long_description: "Train a model on your custom data to detect human body poses and their location in images"
+author: "cnvrg"
+author_email: "info@cnvrg.io"
+
+tags:
+  - training
+tasks:
+  - title: S3 Connector
+    top: 300
+    left: 0
+
+    # Type must be according to the flow task conventions (data, exec, deploy)
+    type: exec
+
+    # The library data
+    library: s3-connector
+    library_version: 1.0.0
+
+    # The flattened library parameters (in this case we have training library)
+    command: python s3-connector.py
+
+    requirements:
+      cpu: 3.5
+      memory: 8
+      gpu: 0
+      hpu: 0
+
+    image: cnvrg:v5.0
+    language: python3
+
+    # The "arguments" property changes to "params", rest remains the same.
+    # Params in the blueprint yaml can be used to override the arguments in the library.
+    params:
+      - key: endpoint
+        type: 'categorical'
+        values:
+          - 'http://s3.amazonaws.com download'
+      - key: bucketname
+        type: 'categorical'
+        values:
+          - 'libhub-readme'
+      - key: localdir
+        type: 'categorical'
+        values:
+          - '/cnvrg'
+      - key: prefix
+        type: 'categorical'
+        values:
+          - 'pose_detection_data/'
+  - title: Batch
+    top: 400
+    left: 100
+
+    # Type must be according to the flow task conventions (data, exec, deploy)
+    type: exec
+
+    # The library data
+    library: pose-detection-batch
+    library_version: 1.0.0
+
+    # The flattened library parameters (in this case we have training library)
+    command: python3 batch.py
+
+    requirements:
+      cpu: 3.5
+      memory: 8
+      gpu: 0
+      hpu: 0
+
+    image: cnvrg:v5.0
+    language: python3
+
+    # The "arguments" property changes to "params", rest remains the same.
+    # Params in the blueprint yaml can be used to override the arguments in the library.
+    params:
+      - key: test_dir_img
+        type: 'categorical'
+        values:
+          - '/input/s3_connector/pose_detection/test_images/'
+      - key: model_weights
+        type: 'categorical'
+        values:
+          - '/input/s3_connector/pose_detection/weights.best.hdf5'
+      - key: class_names
+        type: 'categorical'
+        values:
+          - '/input/s3_connector/pose_detection/class_names.csv'
+      - key: optimizer
+        type: 'categorical'
+        value:
+          - 'adam'
+      - key: loss
+        type: 'categorical'
+        values:
+          - 'categorical_crossentropy'
+      - key: metrics
+        type: 'discrete'
+        values:
+          - 'accuracy'
+      
+relations:
+  - from: S3 Connector
+    to: Batch

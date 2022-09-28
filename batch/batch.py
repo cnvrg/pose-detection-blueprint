@@ -1,9 +1,5 @@
 import tensorflow as tf
 import numpy as np
-import cv2
-from matplotlib import pyplot as plt
-from matplotlib.collections import LineCollection
-import matplotlib.patches as patches
 import csv
 import cv2
 import itertools
@@ -11,13 +7,15 @@ import numpy as np
 import pandas as pd
 import os
 import sys
-import tempfile
-import tqdm
 import torch
 import argparse
 from tensorflow import keras
-import magic
 import base64 as b6
+import PIL
+from PIL import Image
+from PIL import ImageDraw
+from PIL import ImageFont
+
 
 cnvrg_workdir = os.environ.get("CNVRG_WORKDIR", "/cnvrg")
 parser = argparse.ArgumentParser(description="""Creator""")
@@ -321,6 +319,13 @@ for file in os.listdir(test_image_path):
         y_pred = model_3.predict(df)
         y_pred_label = [class_names[i] for i in np.argmax(y_pred, axis=1)]
         conf = np.amax(y_pred)
+        # drawing the bounding boxes
+        
+        draw_img= Image.open(savepath)
+        draw_image = ImageDraw.Draw(draw_img)
+        box_shape = [(xmin,ymin),(xmax-xmin,ymax-ymin)]
+        draw_image.rectangle(box_shape, outline ="black")
+
         final_output_frame.at[cnt,'filename'] = file
         final_output_frame.at[cnt,'x_coord'] = xmin
         final_output_frame.at[cnt,'y_coord'] = ymin
@@ -328,10 +333,9 @@ for file in os.listdir(test_image_path):
         final_output_frame.at[cnt,'height'] = ymax-ymin
         final_output_frame.at[cnt,'confidence_score'] = round(float(conf),4)
         final_output_frame.at[cnt,'predicted_class'] = y_pred_label[0]
-        #predict_1[imgnumber + 1]["human " + str(i + 1)] = {
-        #    "bbox": [xmin, ymin, xmax, ymax],
-        #    "pose": y_pred_label[0],
-        #    "conf": float(conf),
-        #}
+    
+    draw_image.save(savepath)
+    draw_image.close()
+    
 final_path = os.path.join(cnvrg_workdir,'final_output.csv')
 final_output_frame.to_csv(final_path)

@@ -29,33 +29,13 @@ More information is given at the end of this documentation.
 - `--output_test_folder` refers to the name of the directory which contains the test images with the bounding boxes are drawn over them.
      ```
     | - Output Artifacts
-        | - poses_images_out_test
-            | - chair
-                | - img13.jpg
-                | - img24.jpg
-                | ..img25.jpg
-            | - tree
-                | - img2.jpg
-                | - img50.jpg
-                | ..img75.jpg
-- `--train csv file` refers to the name of the file which contains the coordinates of the key checkpoints of a pose (location of elbow, eye, nose etc), of the images in training folder.
-
-    |file_name   |NOSE_x   |NOSE_y   |Nose_score   |class_no   |class_name
-    |---|---|---|---|---|---|
-    |chair/girl1_chair070.jpg   |158   |91   |0.48   |0  |chair   |
-    |tree/girl1_tree075.jpg   |165   |100   |0.67   |2   |tree   |
-    |dog/girl1_dog076.jpg   |165   |102   |0.64   |3   |dog   |
-- `--test csv file` refers to the name of the file which contains the coordinates of the key checkpoints of a pose (location of elbow, eye, nose etc), of the images in test folder.
-    |file_name   |NOSE_x   |NOSE_y   |Nose_score   |class_no   |class_name
-    |---|---|---|---|---|---|
-    |chair/girl1_chair070.jpg   |158   |91   |0.48   |0  |chair   |
-    |tree/girl1_tree075.jpg   |165   |100   |0.67   |2   |tree   |
-    |dog/girl1_dog076.jpg   |165   |102   |0.64   |3   |dog   |
-- `--box_file` refers to the name of the file which contains the bounding box information
-    |file_name  |x_coord	|y_coord	|width	|height     |conf_score
-    |---|---|---|---|---|---|
-    |/input/recreate/test/cobra/guy3_cobra078.jpg	|37	    |34.5	|74	|69	|0.47530052
+            | - img13.jpg
+            | - img24.jpg
+            | ..img25.jpg
+            | - img2.jpg
+            | - img50.jpg
+            | ..img75.jpg
 ## How to run
 ```
-python3 pose_detect/pose.py --train_dir /input/recreate/train/ --test_dir /input/recreate/test/
+
 ```
