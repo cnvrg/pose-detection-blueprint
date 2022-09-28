@@ -85,9 +85,9 @@ orig = os.getcwd()
 os.chdir(currpath)
 sys.path.append(currpath)
 
-from prerun import download_model_files
+#from prerun import download_model_files
 
-download_model_files()
+#download_model_files()
 
 yolo_model = torch.hub.load(
     os.getcwd(), "custom", source="local", path=model_path, force_reload=True
