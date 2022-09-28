@@ -83,11 +83,11 @@ tasks:
       - key: model_weights
         type: 'categorical'
         values:
-          - '/input/s3_connector/pose_detection/weights.best.hdf5'
+          - '/input/s3_connector/pose_detection/generic/weights.best.hdf5'
       - key: class_names
         type: 'categorical'
         values:
-          - '/input/s3_connector/pose_detection/class_names.csv'
+          - '/input/s3_connector/pose_detection/generic/class_names.csv'
       - key: optimizer
         type: 'categorical'
         value:

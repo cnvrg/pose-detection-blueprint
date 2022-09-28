@@ -1,6 +1,6 @@
 title: Pose Detection Batch
 version: 1.0.0
-description: "classify the image on the basis of the checkpoints via a pretrained keras model and writing the label on it"
+description: "classify the poses in an image via checkpoints through a pretrained keras model"
 icon: python
 
 author: "cnvrg"
