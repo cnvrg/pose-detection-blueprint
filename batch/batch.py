@@ -278,7 +278,7 @@ outputs = keras.layers.Dense(len(ch), activation="softmax")(layer)
 
 model_3 = keras.Model(inputs, outputs)
 model_3.compile(optimizer=optimizer, loss=loss, metrics=[metrics])
-model_3.load_weights(model_path)
+model_3.load_weights(model_weights)
 final_output_frame = pd.DataFrame(columns=['filename','x_coord','y_coord','width','height','confidence_score','predicted_class'])
 cnt = 0
 for file in os.listdir(test_image_path):
