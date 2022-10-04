@@ -76,7 +76,7 @@ optimizer = args.optimizer
 loss = args.loss
 metrics = args.metrics
 model_weights = args.model_weights
-class_names = args.class_names
+class_name = args.class_names
 # load yolo model
 
 currpath = os.path.dirname(os.path.abspath(__file__))
@@ -249,15 +249,8 @@ def bounding_box(points):
         int(max(y_coordinates)),
     )
 
-#if os.path.exists("/input/pose_classify/weights.best.hdf5"):
-#    class_names = "/input/pose_classify/class_names.csv"
-#    model_path = "/input/pose_classify/weights.best.hdf5"
-#else:
-#    class_names = currpath + "/class_names.csv"
-#    model_path = currpath + "/weights.best.hdf5"
-
 # read the names of the categories the model is capable of predicting
-ch = pd.read_csv(class_names)
+ch = pd.read_csv(class_name)
 class_names = ch.values.flatten()
 
 # load keras model
@@ -334,8 +327,8 @@ for file in os.listdir(test_image_path):
         final_output_frame.at[cnt,'confidence_score'] = round(float(conf),4)
         final_output_frame.at[cnt,'predicted_class'] = y_pred_label[0]
     
-    draw_image.save(savepath)
-    draw_image.close()
+    draw_img.save(savepath)
+    draw_img.close()
     
 final_path = os.path.join(cnvrg_workdir,'final_output.csv')
 final_output_frame.to_csv(final_path)

@@ -49,7 +49,7 @@ tasks:
       - key: prefix
         type: 'categorical'
         values:
-          - 'pose_detection_data/'
+          - 'model_files/pose_detection/'
   - title: Batch
     top: 400
     left: 100
@@ -79,15 +79,15 @@ tasks:
       - key: test_dir_img
         type: 'categorical'
         values:
-          - '/input/s3_connector/pose_detection/test_images/'
+          - '/input/s3_connector/model_files/pose_detection/test_images/'
       - key: model_weights
         type: 'categorical'
         values:
-          - '/input/s3_connector/pose_detection/generic/weights.best.hdf5'
+          - '/input/s3_connector/model_files/pose_detection/generic/weights.best.hdf5'
       - key: class_names
         type: 'categorical'
         values:
-          - '/input/s3_connector/pose_detection/generic/class_names.csv'
+          - '/input/s3_connector/model_files/pose_detection/generic/class_names.csv'
       - key: optimizer
         type: 'categorical'
         value:
