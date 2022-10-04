@@ -285,8 +285,8 @@ for file in os.listdir(test_image_path):
     orig = cv2.imread(savepath)
     orig2 = orig.copy()
     
-    draw_img= Image.open(savepath)    
-    savepath_first = os.path.join(cnvrg_workdir,savepath)
+    draw_img= Image.open(savepath)
+    savepath_first = os.path.join(cnvrg_workdir,file)
     if humans == 0:
         pass
     for i in range(humans):  # for each detected human loop
