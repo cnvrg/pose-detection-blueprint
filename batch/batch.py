@@ -326,7 +326,7 @@ for file in os.listdir(test_image_path):
         final_output_frame.at[cnt,'height'] = ymax-ymin
         final_output_frame.at[cnt,'confidence_score'] = round(float(conf),4)
         final_output_frame.at[cnt,'predicted_class'] = y_pred_label[0]
-    
+    savepath = os.path.join(cnvrg_workdir,savepath)
     draw_img.save(savepath)
     draw_img.close()
     
