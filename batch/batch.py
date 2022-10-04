@@ -284,6 +284,9 @@ for file in os.listdir(test_image_path):
     humans = len(human_detection)
     orig = cv2.imread(savepath)
     orig2 = orig.copy()
+    
+    draw_img= Image.open(savepath)    
+    savepath_first = os.path.join(cnvrg_workdir,savepath)
     if humans == 0:
         pass
     for i in range(humans):  # for each detected human loop
@@ -313,12 +316,14 @@ for file in os.listdir(test_image_path):
         y_pred_label = [class_names[i] for i in np.argmax(y_pred, axis=1)]
         conf = np.amax(y_pred)
         # drawing the bounding boxes
-        
-        draw_img= Image.open(savepath)
-        draw_image = ImageDraw.Draw(draw_img)
-        box_shape = [(xmin,ymin),(xmax-xmin,ymax-ymin)]
-        draw_image.rectangle(box_shape, outline ="black")
 
+        draw_image = ImageDraw.Draw(draw_img)
+        box_shape = [(xmin,ymin),(xmax,ymax)]
+        font_name = 'InputSans-Regular.ttf'
+        font = ImageFont.truetype(font_name, 10)
+        draw_image.rectangle(box_shape, outline ="black")
+        draw_image.text((xmin, ymin), y_pred_label[0], fill=(255, 126, 87), font=font)
+        #I1 = ImageDraw.Draw(img)
         final_output_frame.at[cnt,'filename'] = file
         final_output_frame.at[cnt,'x_coord'] = xmin
         final_output_frame.at[cnt,'y_coord'] = ymin
@@ -326,8 +331,8 @@ for file in os.listdir(test_image_path):
         final_output_frame.at[cnt,'height'] = ymax-ymin
         final_output_frame.at[cnt,'confidence_score'] = round(float(conf),4)
         final_output_frame.at[cnt,'predicted_class'] = y_pred_label[0]
-    savepath = os.path.join(cnvrg_workdir,savepath)
-    draw_img.save(savepath)
+
+    draw_img.save(savepath_first)
     draw_img.close()
     
 final_path = os.path.join(cnvrg_workdir,'final_output.csv')
