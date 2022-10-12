@@ -2,6 +2,7 @@
 This library is created to detect humans and their key pose checkpoints in all kinds of images as well as draw the bounding boxes over them. The user needs to provide the path to the directory containing the test images.
 Ultralytics yolov5 for detecting humans in each image and for each detected human we run pose classification model. The output contains the location for each human in the form of bounding box (xmin,ymin,xmax,ymax) , along with the classified pose and confidence.
 This module also uses a saved, keras model for classifying the checkpoint data into various poses. The model can be trained from the pose-detection-train blueprint and the trained model can be uploaded to s3.
+The keras model is based from tensorflow.
 More information is given at the end of this documentation.
 ## Arguments
 - `-- test_dir_img` refers to the directory which contains all the test images.
