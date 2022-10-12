@@ -1,40 +1,29 @@
-# Predict
-This inference library is created to support inference for multiple images containing multiple humans. We use the Ultralytics yolov5 for detecting humans in each image and for each detected human we run pose classification model. The output contains the location for each human in the form of bounding box (xmin,ymin,xmax,ymax) , along with the classified pose and confidence.
-## Arguments
-`img` refer to the list of images encoded in bytes.
-## Output
-JSON Response for an example call to the api
+# Batch Predict
+This module uses yolov5 to detect a model a saved, keras model for classifying the checkpoint data into various poses. The model can be trained from the pose-detection-train blueprint and the trained model can be uploaded to s3.
+Ultralytics yolov5 for detecting humans in each image and for each detected human we run pose classification model. The output contains the location for each human in the form of bounding box (xmin,ymin,xmax,ymax) , along with the classified pose and confidence.
+In order to use this model with your data, you would need to provide a folder located in s3:
+- `test_images`: A folder with all the images you want to train the model on.
+1. Click on `Use Blueprint` button
+2. You will be redirected to your blueprint flow page
+3. In the flow, edit the following tasks to provide your data:
 
-`
- curl -X POST \ {link to your deployed endpoint} \ -H 'Cnvrg-Api-Key: {your_api_key}' \ -H 'Content-Type: application/json' \ -d '{"img": [encodedimg1,encodedimg2]}' `
-  
-```{"predictions": {0:[{'human 1':{'bbox':[10,20,30,40],'pose':"standing",'conf':0.9},'human 2':{'bbox':[50,60,70,80],'pose':"sitting",'conf':0.8}],1:[{'human 1':{'bbox':[90,100,110,120],'pose':"standing",'conf':0.78}]}```
-### Model Details
-### Movenet
-MoveNet is an ultra fast and accurate model that detects 17 keypoints of a body. The model is offered on TF Hub with two variants, known as Lightning and Thunder. Lightning is intended for latency-critical applications, while Thunder is intended for applications that require high accuracy. Both models run faster than real time (30+ FPS) on most modern desktops, laptops, and phones, which proves crucial for live fitness, health, and wellness applications.
-[Movenet at Tensorflow](https://www.tensorflow.org/hub/tutorials/movenet#:~:text=MoveNet%20is%20an%20ultra%20fast,applications%20that%20require%20high%20accuracy.)
+   In the `S3 Connector` task:
+    * Under the `bucketname` parameter provide the bucket name of the data
+    * Under the `prefix` parameter provide the main path to where the images and labels folders are located
 
-### Keras Classification Model
+   In the `Batch` task:
+    *  Under the `images` parameter provide the path to the poses directories containing images including the prefix you provided in the `S3 Connector`, it should look like:
+       `/input/s3_connector/<prefix>/test_images/` 
+       where prefix = '/model_files/test_images/'
 
-- Layer1 : Dense [512 units] ; [Activation : Relu6] ; [Inputs :- Embeddings]
-#Dropout [rate = 0.2] ; [Input :- Layer1]
-- Layer2 : Dense [256 units] ; [Activation : Relu6] ; [Inputs :- Layer2]
-#Dropout [rate = 0.2] ; [Input :- Layer3]
-- Layer3: Dense [128 units] ; [Activation : Relu6] ; [Inputs :- Layer2]
-#Dropout [rate = 0.2] ; [Input :- Layer3]
-- Layer4 : Dense [128 units] ; [Activation : Relu6] ; [Inputs :- Layer2]
-#Dropout [rate = 0.2] ; [Input :- Layer3]
-- Layer5 : Dense [64 units] ; [Activation : Relu6] ; [Inputs :- Layer2]
-#Dropout [rate = 0.2] ; [Input :- Layer3]
-- Layer6(Output) : Dense [number of classes as unitcount] ; [Activation Softmax]
+**NOTE**: You can use prebuilt data examples paths that are already provided
 
-More information on
-- [Keras](https://keras.io/)
-- [Dense](https://keras.io/api/layers/core_layers/dense/)
-- [Dropout](https://keras.io/api/layers/regularization_layers/dropout/)
-- [Softmax](https://keras.io/api/layers/activation_layers/softmax/)
+4. Click on the 'Run Flow' button
+5. In a few minutes you will train a new pose detection model and deploy as a new API endpoint
+6. Go to the 'Serving' tab in the project and look for your endpoint
+7. You can use the `Try it Live` section with any image to check your model
+8. You can also integrate your API with your code using the integration panel at the bottom of the page
 
-# Reference
-https://github.com/tryagainconcepts/tf-pose-estimation
-https://arxiv.org/abs/1812.08008
-https://github.com/ultralytics/yolov5
+Congrats! You have deployed a custom model that can detects and classifies human body poses in images!
+
+[See here how we created this blueprint](https://github.com/cnvrg/pose-detection-blueprint)
