@@ -26,8 +26,6 @@ This library is created to classify the image into a specific pose (out of the o
                 | - img2.jpg
                 | - img50.jpg
                 | ..img75.jpg
-- `--font` refer to the name and path of the font with which it the class name is written over the image
-    `--font_data/ InputSans-Regular.ttf`
 - `--box_file` refer to the input csv file which contains the bounding box information for displaying as a json response or as a csv
     |file_name  |x_coord	|y_coord	|width	|height     |conf_score
     |---|---|---|---|---|---|
