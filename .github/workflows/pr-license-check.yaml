@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - Add-license.md-file-to-data-connectors-repo
+      - add-license
   pull_request:
     branches:
       - main
