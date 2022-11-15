@@ -15,4 +15,4 @@ Complete the following steps to deploy this pose-detector API endpoint:
 
 An API endpoint that detects human body poses in images has now been deployed.
 
-Click [here] for this blueprint's detailed run instructions. To learn how this blueprint was created, click [here](https://github.com/cnvrg/pose-detection-blueprint).
+To learn how this blueprint was created, click [here](https://github.com/cnvrg/pose-detection-blueprint).
