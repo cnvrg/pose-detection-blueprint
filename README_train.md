@@ -40,4 +40,4 @@ Complete the following steps to train the pose-detector model:
 
 A custom model and API endpoint, which can detect human poses in images, have now been trained and deployed.
 
-Click [here](link) for this blueprint's detailed run instructions. To learn how this blueprint was created, click [here](https://github.com/cnvrg/pose-detection-blueprint).
+To learn how this blueprint was created, click [here](https://github.com/cnvrg/pose-detection-blueprint).
