@@ -1,7 +1,7 @@
 title: Pose Detection Batch
 version: 1.0.0
-description: "Use a pretrained model to detect and classify multiple humans on images"
-long_description: "Use yolo for detecting mutiple humans and a custom keras model for classifying humans amongst various poses"
+description: "Detect humans and classify their poses in a batch of images and videos"
+long_description: "Detect humans and classify their poses in a batch of images and videos sing YOLOv5 for human detection and a custom-trained Keras model for pose classification."
 author: "cnvrg"
 author_email: "info@cnvrg.io"
 

@@ -1,7 +1,7 @@
 title: Pose Detection Train
 version: 1.0.0
-description: "Train a model to detect body poses in images"
-long_description: "Train a model on your custom data to detect human body poses and their location in images"
+description: "Train a model with your custom data to detect human body poses in images and videos"
+long_description: "Train a tailored model using your custom data, and deploy an endpoint, which detects human body poses and their position coordinates in images and videos."
 author: "cnvrg"
 author_email: "info@cnvrg.io"
 
