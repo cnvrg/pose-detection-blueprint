@@ -22,8 +22,8 @@
 ---
 title: Pose Detection Inference # Required on creation, replaces the "flow" parameter
 version: 1.0.0 # Required
-description: "Detect Poses in images and videos"
-long_description: "Immediately detect and identify poses and activity types in images and the surrounding box of the detected objects in the image."
+description: "Detect human poses and their positions in images and videos"
+long_description: "Detect human poses and their positions in images and videos using a pretrained pose-detector model and a custom dataset."
 # Optional properties for crediting authors
 author: "cnvrg"
 author_email: "info@cnvrg.io"

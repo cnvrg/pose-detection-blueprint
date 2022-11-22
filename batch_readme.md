@@ -1,56 +1,22 @@
-# Batch Predict
-This library is created to detect humans and their key pose checkpoints in all kinds of images as well as draw the bounding boxes over them. The user needs to provide the path to the directory containing the test images.
-Ultralytics yolov5 for detecting humans in each image and for each detected human we run pose classification model. The output contains the location for each human in the form of bounding box (xmin,ymin,xmax,ymax) , along with the classified pose and confidence.
-This module also uses a saved, keras model for classifying the checkpoint data into various poses. The model can be trained from the pose-detection-train blueprint and the trained model can be uploaded to s3.
-The keras model is based from tensorflow.
-More information is given at the end of this documentation.
-## Arguments
-- `-- test_dir_img` refers to the directory which contains all the test images.
-     ```
-        | - img13.jpg
-        | - img24.jpg
-        | ..img25.jpg
-        | - img2.jpg
-        | - img50.jpg
-        | ..img75.jpg
+Use this blueprint to run in batch mode a pretrained tailored model that detects human body poses in images using your custom data. The model can be trained using this counterpart’s [training blueprint](https://metacloud.cloud.cnvrg.io/marketplace/blueprints/pose-detection-train), after which the trained model can be uploaded to the S3 Connector. To train this model with your data, create a folder also located in the S3 Connector containing the images (with humans in various poses) on which to train the model.
 
-## Output
-- `--output_train_folder` refers to the name of the directory which contains the images with the bounding boxes drawn over them.
-    ```
-    | - Output Artifacts
-            | - img13.jpg
-            | - img24.jpg
-            | ..img25.jpg
-            | - img2.jpg
-            | - img50.jpg
-            | ..img75.jpg
+Complete the following steps to run the pose-detector blueprint in batch mode:
+1. Click **Use Blueprint** button. The cnvrg Blueprint Flow page displays.
+2. Click the **S3 Connector** task to display its dialog.
+   - Within the **Parameters** tab, provide the following Key-Value pair information:
+     - Key: `bucketname` − Value: provide the data bucket name
+     - Key: `prefix` − Value: provide the main path to the images folder
+   - Click the **Advanced** tab to change resources to run the blueprint, as required.
+3. Click the **Batch-Predict** task to display its dialog.
+   - Within the **Parameters** tab, provide the following Key-Value pair information:
+     - Key: `test_dir_img` − Value: provide the S3 location containing all the test images in the following format: `/input/s3_connector/model_files/pose_detection/test_images/`
+     - Key: `model_weights` − Value: provide the S3 location containing the model weights in the following format: `/input/s3_connector/model_files/pose_detection/generic/weights.best.hdf5`
+     - Key: `class_names` − Value: provide the S3 location containing the class names in the following format: `/input/s3_connector/model_files/pose_detection/generic/class_names.csv`
+     NOTE: You can use the prebuilt example data paths provided.
+   - Click the **Advanced** tab to change resources to run the blueprint, as required.
+4. Click the **Run** button. The cnvrg software deploys a pose-detector model that detects human poses, their classifications, and their locations in images.
+5. Track the blueprint’s real-time progress in its Experiments page, which displays artifacts such as logs, metrics, hyperparameters, and algorithms.
+6. Select **Batch Inference > Experiments > Artifacts** and locate the bounding box images and output CSV file.
+7. Select the **final_output.csv** File Name, click the right Menu icon, and click **Open File** to view the output CSV file.
 
-### Model Details
-### Yolov5
-YOLOv5 🚀 is a family of compound-scaled object detection models trained on the COCO dataset, and includes simple functionality for Test Time Augmentation (TTA), model ensembling, hyperparameter evolution, and export to ONNX, CoreML and TFLite.
-[Yolov5 at Ultralytics](https://pytorch.org/hub/ultralytics_yolov5/#:~:text=Model%20Description,to%20ONNX%2C%20CoreML%20and%20TFLite.)
-
-### Keras Classification Model
-
-- Layer1 : Dense [512 units] ; [Activation : Relu6] ; [Inputs :- Embeddings]
-#Dropout [rate = 0.2] ; [Input :- Layer1]
-- Layer2 : Dense [256 units] ; [Activation : Relu6] ; [Inputs :- Layer2]
-#Dropout [rate = 0.2] ; [Input :- Layer3]
-- Layer3: Dense [128 units] ; [Activation : Relu6] ; [Inputs :- Layer2]
-#Dropout [rate = 0.2] ; [Input :- Layer3]
-- Layer4 : Dense [128 units] ; [Activation : Relu6] ; [Inputs :- Layer2]
-#Dropout [rate = 0.2] ; [Input :- Layer3]
-- Layer5 : Dense [64 units] ; [Activation : Relu6] ; [Inputs :- Layer2]
-#Dropout [rate = 0.2] ; [Input :- Layer3]
-- Layer6(Output) : Dense [number of classes as unitcount] ; [Activation Softmax]
-
-More information on
-- [Keras](https://keras.io/)
-- [Dense](https://keras.io/api/layers/core_layers/dense/)
-- [Dropout](https://keras.io/api/layers/regularization_layers/dropout/)
-- [Softmax](https://keras.io/api/layers/activation_layers/softmax/)
-
-# Reference
-https://github.com/tryagainconcepts/tf-pose-estimation
-https://arxiv.org/abs/1812.08008
-https://github.com/ultralytics/yolov5
+A custom model that can detect an image’s human body poses has now been deployed in batch mode. To learn how this blueprint was created, click [here](https://github.com/cnvrg/pose-detection-blueprint).
