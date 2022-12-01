@@ -1,0 +1,30 @@
+name: Unit Tests for Pose Classify
+
+env:
+    TEST_DIRECTORY: classify
+on:
+  push:
+    branches:
+      - main
+      - add-unittests
+    paths:
+      - ${TEST_DIRECTORY}/**
+      
+  pull_request:
+
+jobs:
+  unittest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+      - name: Install libs
+        run: |
+          pip install -r ${TEST_DIRECTORY}/requirements.txt
+      - name: Execute unit tests
+        run: |
+          find ./${TEST_DIRECTORY} -name unittest*.py -exec python3 {} +
