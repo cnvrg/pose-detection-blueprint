@@ -1,0 +1,7 @@
+test_arguments:
+  test_data: "test_data.csv"
+  train_data: "train_data.csv"
+  test_y_true: []
+  test_y_pred: []
+  binary_y_true: [0,1,0,1]
+  binary_y_pred: [0,1,1,0]
