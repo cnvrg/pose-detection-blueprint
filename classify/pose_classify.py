@@ -210,67 +210,60 @@ def landmarks_to_embedding(landmarks_and_scores):
     embedding = keras.layers.Flatten()(landmarks)
     return embedding
 
-# Define the model
-inputs = tf.keras.Input(shape=(51))
-embedding = landmarks_to_embedding(inputs)
-layer = keras.layers.Dense(512, activation=tf.nn.relu6)(embedding)
-layer = keras.layers.Dropout(0.2)(layer)
-layer = keras.layers.Dense(256, activation=tf.nn.relu6)(layer)
-layer = keras.layers.Dropout(0.2)(layer)
-layer = keras.layers.Dense(128, activation=tf.nn.relu6)(layer)
-layer = keras.layers.Dropout(0.2)(layer)
-layer = keras.layers.Dense(128, activation=tf.nn.relu6)(layer)
-layer = keras.layers.Dropout(0.2)(layer)
-layer = keras.layers.Dense(64, activation=tf.nn.relu6)(layer)
-layer = keras.layers.Dropout(0.2)(layer)
-outputs = keras.layers.Dense(len(class_names), activation="softmax")(layer)
-model = keras.Model(inputs, outputs)
-# model.summary()
+def model_init(X_train,y_train,X_val,y_val,class_names,output_format=None,):
 
-model.compile(optimizer=optimizer_1, loss=loss_1, metrics=["accuracy"])
+    # Define the model
+    inputs = tf.keras.Input(shape=(51))
+    embedding = landmarks_to_embedding(inputs)
+    layer = keras.layers.Dense(512, activation=tf.nn.relu6)(embedding)
+    layer = keras.layers.Dropout(0.2)(layer)
+    layer = keras.layers.Dense(256, activation=tf.nn.relu6)(layer)
+    layer = keras.layers.Dropout(0.2)(layer)
+    layer = keras.layers.Dense(128, activation=tf.nn.relu6)(layer)
+    layer = keras.layers.Dropout(0.2)(layer)
+    layer = keras.layers.Dense(128, activation=tf.nn.relu6)(layer)
+    layer = keras.layers.Dropout(0.2)(layer)
+    layer = keras.layers.Dense(64, activation=tf.nn.relu6)(layer)
+    layer = keras.layers.Dropout(0.2)(layer)
+    outputs = keras.layers.Dense(len(class_names), activation="softmax")(layer)
+    model = keras.Model(inputs, outputs)
+    # model.summary()
 
-# Add a checkpoint callback to store the checkpoint that has the highest
-# validation accuracy.
-checkpoint_path = cnvrg_workdir + "/weights.best.hdf5"
-checkpoint = keras.callbacks.ModelCheckpoint(
-    checkpoint_path, monitor="val_accuracy", verbose=1, save_best_only=True, mode="max"
-)
-earlystopping = keras.callbacks.EarlyStopping(monitor="val_accuracy", patience=patience_1)
-# Start training
-history = model.fit(
-    X_train,
-    y_train,
-    epochs=epoch_1,
-    batch_size=16,
-    validation_data=(X_val, y_val),
-    callbacks=[checkpoint, earlystopping],
-)
+    model.compile(optimizer=optimizer_1, loss=loss_1, metrics=["accuracy"])
 
-# Evaluate the model using the TEST dataset
-loss, accuracy = model.evaluate(X_test, y_test)
+    # Add a checkpoint callback to store the checkpoint that has the highest
+    # validation accuracy.
+    checkpoint_path = cnvrg_workdir + "/weights.best.hdf5"
+    checkpoint = keras.callbacks.ModelCheckpoint(
+        checkpoint_path, monitor="val_accuracy", verbose=1, save_best_only=True, mode="max"
+    )
+    earlystopping = keras.callbacks.EarlyStopping(monitor="val_accuracy", patience=patience_1)
+    # Start training
+    history = model.fit(
+        X_train,
+        y_train,
+        epochs=epoch_1,
+        batch_size=16,
+        validation_data=(X_val, y_val),
+        callbacks=[checkpoint, earlystopping],
+    )
 
-# Classify pose in the TEST dataset using the trained model
-y_pred = model.predict(X_test)
+    # Evaluate the model using the TEST dataset
+    loss, accuracy = model.evaluate(X_test, y_test)
 
-# Convert the prediction result to class name
-y_pred_label = [class_names[i] for i in np.argmax(y_pred, axis=1)]
-y_true_label = [class_names[i] for i in np.argmax(y_test, axis=1)]
-
-# Plot the confusion matrix
-cm = confusion_matrix(np.argmax(y_test, axis=1), np.argmax(y_pred, axis=1))
-
-# Print the classification report
-print("\nClassification Report:\n", classification_report(y_true_label, y_pred_label))
-
-def classification_Report(X_test,y_test,class_names=None):
-    
     # Classify pose in the TEST dataset using the trained model
     y_pred = model.predict(X_test)
+
     # Convert the prediction result to class name
     y_pred_label = [class_names[i] for i in np.argmax(y_pred, axis=1)]
     y_true_label = [class_names[i] for i in np.argmax(y_test, axis=1)]
 
     # Plot the confusion matrix
     cm = confusion_matrix(np.argmax(y_test, axis=1), np.argmax(y_pred, axis=1))
-    result = classification_report(y_true_label, y_pred_label)
+
+    # Print the classification report
+    #print("\nClassification Report:\n", classification_report(y_true_label, y_pred_label))
+
+    result = classification_report(y_true_label, y_pred_label,output_dict=output_format)
+    print(result)
     return result
