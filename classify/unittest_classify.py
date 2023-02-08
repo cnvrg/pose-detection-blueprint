@@ -3,6 +3,7 @@ import pose_classify
 import yaml
 from yaml.loader import SafeLoader
 import os
+import PIL
 from PIL import Image
 import numpy as np
 import pandas as pd
