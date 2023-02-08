@@ -3,6 +3,7 @@ import pose_classify
 import yaml
 from yaml.loader import SafeLoader
 import os
+from PIL import Image
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
