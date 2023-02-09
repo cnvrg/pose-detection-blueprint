@@ -5,6 +5,7 @@ cachetools==4.2.4
 certifi==2021.10.8
 charset-normalizer==2.0.11
 clang==5.0
+cnvrg
 #dataclasses==0.8
 flatbuffers==1.12
 gast==0.4.0
