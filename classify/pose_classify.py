@@ -48,7 +48,7 @@ from cnvrg import Experiment
 sys.path.append(pose_sample_rpi_path)
 from data import BodyPart
 
-cnvrg_workdir = os.environ.get("CNVRG_WORKDIR", "/cnvrg")
+cnvrg_workdir = os.environ.get("CNVRG_WORKDIR", "cnvrg")
 parser = argparse.ArgumentParser(description="""Creator""")
 parser.add_argument(
     "-f",
@@ -147,7 +147,7 @@ def load_pose_landmarks(csv_path):
 
 # Load the train data
 X, y, class_names, _ = load_pose_landmarks(csvs_out_train_path)
-pd.DataFrame(class_names).to_csv(cnvrg_workdir + "class_names.csv")
+pd.DataFrame(class_names).to_csv(cnvrg_workdir + "/class_names.csv")
 # Split training data (X, y) into (X_train, y_train) and (X_val, y_val)
 X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.15)
 # Load the test data
