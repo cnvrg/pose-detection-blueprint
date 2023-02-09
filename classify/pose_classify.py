@@ -147,7 +147,7 @@ def load_pose_landmarks(csv_path):
 
 # Load the train data
 X, y, class_names, _ = load_pose_landmarks(csvs_out_train_path)
-pd.DataFrame(class_names).to_csv(cnvrg_workdir + "/class_names.csv")
+pd.DataFrame(class_names).to_csv(cnvrg_workdir + "class_names.csv")
 # Split training data (X, y) into (X_train, y_train) and (X_val, y_val)
 X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.15)
 # Load the test data
