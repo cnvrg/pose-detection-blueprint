@@ -48,6 +48,8 @@ from cnvrg import Experiment
 sys.path.append(pose_sample_rpi_path)
 from data import BodyPart
 
+if not os.path.exists('cnvrg'):
+   os.makedirs('cnvrg')
 cnvrg_workdir = os.environ.get("CNVRG_WORKDIR", "cnvrg")
 parser = argparse.ArgumentParser(description="""Creator""")
 parser.add_argument(
