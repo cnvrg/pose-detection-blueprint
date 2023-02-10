@@ -33,7 +33,7 @@ import sys
 import tensorflow as tf
 from tensorflow import keras
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import classification_report, confusion_matrix, f1_score
 import argparse
 from PIL import Image
 from PIL import ImageDraw
@@ -48,39 +48,41 @@ from cnvrg import Experiment
 sys.path.append(pose_sample_rpi_path)
 from data import BodyPart
 
-cnvrg_workdir = os.environ.get("CNVRG_WORKDIR", "/cnvrg")
+if not os.path.exists('cnvrg'):
+   os.makedirs('cnvrg')
+cnvrg_workdir = os.environ.get("CNVRG_WORKDIR", "cnvrg")
 parser = argparse.ArgumentParser(description="""Creator""")
 parser.add_argument(
     "-f",
     "--train_dir",
     action="store",
     dest="train_dir",
-    default="input/detect/train_data.csv",
-    required=True,
+    default="train_data.csv",
+    required=False,
     help="""string. csv topics data file""",
 )
 parser.add_argument(
     "--test_dir",
     action="store",
     dest="test_dir",
-    default="input/detect/test_data.csv",
-    required=True,
+    default="test_data.csv",
+    required=False,
     help="""string. csv topics data file""",
 )
 parser.add_argument(
     "--test_dir_img",
     action="store",
     dest="test_dir_img",
-    default="input/detect/poses_images_out_test/",
-    required=True,
+    default="poses_images_out_test/",
+    required=False,
     help="""string bounding box images folder test""",
 )
 parser.add_argument(
     "--box_file",
     action="store",
     dest="box_file",
-    default="/input/detect/box_file.csv",
-    required=True,
+    default="box_file.csv",
+    required=False,
     help="""csv containing bounding box information""",
 )
 parser.add_argument(
@@ -88,7 +90,7 @@ parser.add_argument(
     action="store",
     dest="optimizer_1",
     default="adam",
-    required=True,
+    required=False,
     help="""hyperparameter""",
 )
 parser.add_argument(
@@ -96,7 +98,7 @@ parser.add_argument(
     action="store",
     dest="loss_1",
     default="categorical_crossentropy",
-    required=True,
+    required=False,
     help="""hyperparameter""",
 )
 parser.add_argument(
@@ -104,7 +106,7 @@ parser.add_argument(
     action="store",
     dest="patience_1",
     default=20,
-    required=True,
+    required=False,
     help="""hyperparameter""",
 )
 parser.add_argument(
@@ -112,7 +114,7 @@ parser.add_argument(
     action="store",
     dest="epoch_1",
     default=200,
-    required=True,
+    required=False,
     help="""hyperparameter""",
 )
 
@@ -210,176 +212,60 @@ def landmarks_to_embedding(landmarks_and_scores):
     embedding = keras.layers.Flatten()(landmarks)
     return embedding
 
+def model_init(X_train,y_train,X_val,y_val,class_names,output_format=None,):
 
-# Define the model
-inputs = tf.keras.Input(shape=(51))
-embedding = landmarks_to_embedding(inputs)
-layer = keras.layers.Dense(512, activation=tf.nn.relu6)(embedding)
-layer = keras.layers.Dropout(0.2)(layer)
-layer = keras.layers.Dense(256, activation=tf.nn.relu6)(layer)
-layer = keras.layers.Dropout(0.2)(layer)
-layer = keras.layers.Dense(128, activation=tf.nn.relu6)(layer)
-layer = keras.layers.Dropout(0.2)(layer)
-layer = keras.layers.Dense(128, activation=tf.nn.relu6)(layer)
-layer = keras.layers.Dropout(0.2)(layer)
-layer = keras.layers.Dense(64, activation=tf.nn.relu6)(layer)
-layer = keras.layers.Dropout(0.2)(layer)
-outputs = keras.layers.Dense(len(class_names), activation="softmax")(layer)
-model = keras.Model(inputs, outputs)
-# model.summary()
+    # Define the model
+    inputs = tf.keras.Input(shape=(51))
+    embedding = landmarks_to_embedding(inputs)
+    layer = keras.layers.Dense(512, activation=tf.nn.relu6)(embedding)
+    layer = keras.layers.Dropout(0.2)(layer)
+    layer = keras.layers.Dense(256, activation=tf.nn.relu6)(layer)
+    layer = keras.layers.Dropout(0.2)(layer)
+    layer = keras.layers.Dense(128, activation=tf.nn.relu6)(layer)
+    layer = keras.layers.Dropout(0.2)(layer)
+    layer = keras.layers.Dense(128, activation=tf.nn.relu6)(layer)
+    layer = keras.layers.Dropout(0.2)(layer)
+    layer = keras.layers.Dense(64, activation=tf.nn.relu6)(layer)
+    layer = keras.layers.Dropout(0.2)(layer)
+    outputs = keras.layers.Dense(len(class_names), activation="softmax")(layer)
+    model = keras.Model(inputs, outputs)
+    # model.summary()
 
-model.compile(optimizer=optimizer_1, loss=loss_1, metrics=["accuracy"])
+    model.compile(optimizer=optimizer_1, loss=loss_1, metrics=["accuracy"])
 
-# Add a checkpoint callback to store the checkpoint that has the highest
-# validation accuracy.
-checkpoint_path = cnvrg_workdir + "/weights.best.hdf5"
-checkpoint = keras.callbacks.ModelCheckpoint(
-    checkpoint_path, monitor="val_accuracy", verbose=1, save_best_only=True, mode="max"
-)
-earlystopping = keras.callbacks.EarlyStopping(monitor="val_accuracy", patience=patience_1)
-# Start training
-history = model.fit(
-    X_train,
-    y_train,
-    epochs=epoch_1,
-    batch_size=16,
-    validation_data=(X_val, y_val),
-    callbacks=[checkpoint, earlystopping],
-)
+    # Add a checkpoint callback to store the checkpoint that has the highest
+    # validation accuracy.
+    checkpoint_path = cnvrg_workdir + "/weights.best.hdf5"
+    checkpoint = keras.callbacks.ModelCheckpoint(
+        checkpoint_path, monitor="val_accuracy", verbose=1, save_best_only=True, mode="max"
+    )
+    earlystopping = keras.callbacks.EarlyStopping(monitor="val_accuracy", patience=patience_1)
+    # Start training
+    history = model.fit(
+        X_train,
+        y_train,
+        epochs=epoch_1,
+        batch_size=16,
+        validation_data=(X_val, y_val),
+        callbacks=[checkpoint, earlystopping],
+    )
 
-# Evaluate the model using the TEST dataset
-loss, accuracy = model.evaluate(X_test, y_test)
+    # Evaluate the model using the TEST dataset
+    loss, accuracy = model.evaluate(X_test, y_test)
 
-# Classify pose in the TEST dataset using the trained model
-y_pred = model.predict(X_test)
+    # Classify pose in the TEST dataset using the trained model
+    y_pred = model.predict(X_test)
 
-# Convert the prediction result to class name
-y_pred_label = [class_names[i] for i in np.argmax(y_pred, axis=1)]
-y_true_label = [class_names[i] for i in np.argmax(y_test, axis=1)]
+    # Convert the prediction result to class name
+    y_pred_label = [class_names[i] for i in np.argmax(y_pred, axis=1)]
+    y_true_label = [class_names[i] for i in np.argmax(y_test, axis=1)]
 
-# Plot the confusion matrix
-cm = confusion_matrix(np.argmax(y_test, axis=1), np.argmax(y_pred, axis=1))
+    # Plot the confusion matrix
+    cm = confusion_matrix(np.argmax(y_test, axis=1), np.argmax(y_pred, axis=1))
 
-# Print the classification report
-print("\nClassification Report:\n", classification_report(y_true_label, y_pred_label))
+    # Print the classification report
+    #print("\nClassification Report:\n", classification_report(y_true_label, y_pred_label))
 
-# ################################ Code Additions ##############################
-e = Experiment()
-
-eval_metrics = (
-    pd.DataFrame(classification_report(y_true_label, y_pred_label, output_dict=True))
-    .transpose()
-    .reset_index()
-)
-eval_metrics.to_csv(cnvrg_workdir + "/eval_metrics_1.csv")
-e.log_param("test_accuracy", accuracy)
-e.log_param("test_loss", loss)
-e.log_param(
-    "accuracy",
-    eval_metrics.loc[eval_metrics["index"] == "accuracy"]["precision"].item(),
-)
-e.log_param(
-    "weighted_precision",
-    eval_metrics.loc[eval_metrics["index"] == "weighted avg"]["precision"].item(),
-)
-e.log_param(
-    "weighted_recall",
-    eval_metrics.loc[eval_metrics["index"] == "weighted avg"]["recall"].item(),
-)
-e.log_param(
-    "weighted_f1",
-    eval_metrics.loc[eval_metrics["index"] == "weighted avg"]["f1-score"].item(),
-)
-e.log_param(
-    "avg_precision",
-    eval_metrics.loc[eval_metrics["index"] == "macro avg"]["precision"].item(),
-)
-e.log_param(
-    "avg_recall",
-    eval_metrics.loc[eval_metrics["index"] == "macro avg"]["recall"].item(),
-)
-e.log_param(
-    "avg_f1", eval_metrics.loc[eval_metrics["index"] == "macro avg"]["f1-score"].item()
-)
-
-for nm in range(len(eval_metrics) - 3):
-    e.log_param(eval_metrics["index"][nm] + "_precision", eval_metrics["precision"][nm])
-    e.log_param(eval_metrics["index"][nm] + "_recall", eval_metrics["recall"][nm])
-    e.log_param(eval_metrics["index"][nm] + "_f1-score", eval_metrics["f1-score"][nm])
-
-########################### Exporting the Predicted Labels ############################
-predicted_labels_1 = pd.DataFrame(np.argmax(y_pred, axis=1))
-predicted_labels_1.columns = ["Predicted_No"]
-predicted_labels_text = pd.DataFrame(y_pred_label)
-predicted_labels_text.columns = ["Predicted_Label"]
-predicted_conf = pd.DataFrame(y_pred.max(axis=1))
-predicted_conf.columns = ["Predicted_Conf"]
-predicted_df = pd.concat([predicted_labels_1, predicted_labels_text], axis=1)
-predicted_df = pd.concat([predicted_df, predicted_conf], axis=1)
-
-df_test_1 = pd.concat(
-    [df_test[["file_name", "class_no", "class_name"]], predicted_df], axis=1
-)
-dictionary_1 = df_test[["class_no", "class_name"]].drop_duplicates()
-##################### Writing on image and exporting the images #######################
-poses_1 = os.listdir(test_bounded_img)
-font_size = 16
-font_path = font_1
-font_2 = ImageFont.truetype(font_path, font_size)
-
-for pose in poses_1:
-    pose_path = os.path.join(test_bounded_img, pose)
-    folder = os.listdir(pose_path)
-    #    os.mkdir(os.path.join(pose_path))
-    for image in folder:
-        image1 = pose + "/" + image
-        name_label = (
-            df_test_1.loc[df_test_1["file_name"] == image1, "Predicted_Label"]
-            .drop_duplicates()
-            .item()
-        )
-        image2 = test_bounded_img + pose + "/" + image
-        img = Image.open(image2)
-        I1 = ImageDraw.Draw(img)
-        print(image1)
-        print(box_file_1.loc[box_file_1["file_name"] == image1, "x_coord"].item())
-        x_coord = int(
-            box_file_1.loc[box_file_1["file_name"] == image1, "x_coord"].item()
-        )
-        y_coord = int(
-            box_file_1.loc[box_file_1["file_name"] == image1, "y_coord"].item()
-        )
-        width = int(box_file_1.loc[box_file_1["file_name"] == image1, "width"].item())
-        height = int(box_file_1.loc[box_file_1["file_name"] == image1, "height"].item())
-        x_coord_1 = (x_coord) - (width / 2)
-        y_coord_1 = (y_coord) - (height / 2)
-        print(x_coord_1)
-        print(y_coord_1)
-        I1.text((x_coord_1, y_coord_1), name_label, fill=(255, 126, 87), font=font_2)
-        img.save(image2)
-        img.close()
-    source = pose_path
-    files = os.listdir(source)
-    os.mkdir(cnvrg_workdir + '/'+pose)
-    print('drow')
-    for file1 in files:
-        shutil.move(os.path.join(source, file1), cnvrg_workdir + '/'+pose)
-        print(file1)
-# source = pose_path
-# files=os.listdir(source)
-# for file1 in files:
-# shutil.move(os.path.join(source,file1),'/cnvrg')
-# box_file_1["x_coord"] = box_file_1["x_coord"] / box_file_1["width_image"]
-# box_file_1["y_coord"] = box_file_1["y_coord"] / box_file_1["height_image"]
-# box_file_1["width"] = box_file_1["width"] / box_file_1["width_image"]
-# box_file_1["height"] = box_file_1["height"] / box_file_1["height_image"]
-
-df_test_1 = df_test_1.merge(box_file_1, on="file_name")
-pd.DataFrame(y_test).to_csv(cnvrg_workdir + "/actual_values_test.csv")
-pd.DataFrame(y_pred_label).to_csv(cnvrg_workdir + "/predicted_labels.csv")
-pd.DataFrame(y_pred).to_csv(cnvrg_workdir + "/predicted_values.csv")
-df_test_1.to_csv(cnvrg_workdir + "/test_data_frame.csv")
-cm1 = pd.DataFrame(cm, columns=class_names)
-
-cm1.index = list(class_names)
-cm1.to_csv(cnvrg_workdir + "/cm.csv")
+    result = classification_report(y_true_label, y_pred_label,output_dict=output_format)
+    print(result)
+    return result
