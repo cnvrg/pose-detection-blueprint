@@ -1,0 +1,23 @@
+name: Create Tag
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+  
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Auto Tag
+        uses: phish108/autotag-action@1.1.52
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          with-v: true
